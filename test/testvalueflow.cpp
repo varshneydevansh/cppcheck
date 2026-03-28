@@ -3112,6 +3112,12 @@ private:
                "    return x;\n"
                "}\n";
         ASSERT_EQUALS(false, testValueOfXKnown(code, 9U, 1));
+
+        code = "int32_t f() {\n"
+               "    const int32_t x = 0xffffffff;\n"
+               "    return x;\n"
+               "}\n";
+        ASSERT_EQUALS(true, testValueOfXKnown(code, 3U, -1));
     }
 
     void valueFlowAfterSwap()
@@ -5805,6 +5811,36 @@ private:
                "    bool b = x;\n"
                "}\n";
         ASSERT_EQUALS(false, testValueOfX(code, 3U, 1));
+
+        code = "int f(int a) {\n"
+               "    int x = a ^ a;\n"
+               "    return x;\n"
+               "}\n";
+        ASSERT_EQUALS(true, testValueOfX(code, 3U, 0));
+
+        code = "int f(int a) {\n"
+               "    int x = a /= a;\n"
+               "    return x;\n"
+               "}\n";
+        ASSERT_EQUALS(true, testValueOfX(code, 3U, 1));
+
+        code = "int f(int a) {\n"
+               "    int x = a -= a;\n"
+               "    return x;\n"
+               "}\n";
+        ASSERT_EQUALS(true, testValueOfX(code, 3U, 0));
+
+        code = "int f(int a) {\n"
+               "    int x = a %= a;\n"
+               "    return x;\n"
+               "}\n";
+        ASSERT_EQUALS(true, testValueOfX(code, 3U, 0));
+
+        code = "int f(int a) {\n"
+               "    int x = a ^= a;\n"
+               "    return x;\n"
+               "}\n";
+        ASSERT_EQUALS(true, testValueOfX(code, 3U, 0));
     }
 
     void valueFlowUninit() {
@@ -6451,6 +6487,11 @@ private:
                "    return x;\n"
                "}\n";
         ASSERT_EQUALS(true, testValueOfXKnown(code, 5U, 0));
+
+        code = "void f() {\n"
+               "    if (int* x = {}) {}\n"
+               "}\n";
+        ASSERT_EQUALS(true, testKnownValueOfTok(code, "=", 0));
     }
 
     static std::string isPossibleContainerSizeValue(std::list<ValueFlow::Value> values,
