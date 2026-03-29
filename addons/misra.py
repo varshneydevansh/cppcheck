@@ -2460,36 +2460,36 @@ class MisraChecker:
                 if essential_type.split(' ')[0] in ('unsigned', 'signed'):
                     return essential_type.split(' ')[0]
             return None
-    
+
         for tok in cfg.tokenlist:
             if not tok.isAssignmentOp:
                 continue
-    
+
             lhs = getEssentialType(tok.astOperand1)
             rhs = getEssentialType(tok.astOperand2)
             if lhs is None or rhs is None:
                 continue
-    
+
             find_std = cfg.standards.c if cfg.standards and cfg.standards.c else self.stdversion
-    
+
             rhs_tok = tok.astOperand2
             rhs_macro_name = rhs_tok.macroName if rhs_tok else None
             rhs_spelling = rhs_macro_name if rhs_macro_name in ('true', 'false') else rhs_tok.str
-    
+
             rhs_is_source_bool_literal = rhs_spelling in ('true', 'false')
             rhs_is_source_int_literal_0_1 = rhs_spelling in ('0', '1')
-    
+
             if lhs == 'bool':
                 if rhs_is_source_bool_literal:
                     continue
                 if find_std == 'c89' and rhs_is_source_int_literal_0_1:
                     continue
-    
+
             lhs_category = get_category(lhs)
             rhs_category = get_category(rhs)
             if lhs_category and rhs_category and lhs_category != rhs_category and rhs_category not in ('signed', 'unsigned'):
                 self.reportError(tok, 10, 3)
-    
+
             if bitsOfEssentialType(lhs) < bitsOfEssentialType(rhs):
                 self.reportError(tok, 10, 3)
 
